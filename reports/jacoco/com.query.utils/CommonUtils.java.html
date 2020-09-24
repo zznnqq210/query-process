@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommonUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">query-service</a> &gt; <a href="index.source.html" class="el_package">com.query.utils</a> &gt; <span class="el_source">CommonUtils.java</span></div><h1>CommonUtils.java</h1><pre class="source lang-java linenums">package com.query.utils;
+
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
+import io.vavr.control.Try;
+
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.function.Function;
+
+<span class="pc bpc" id="L15" title="1 of 2 branches missed.">public abstract class CommonUtils {</span>
+
+    private CommonUtils() {}
+
+    public static &lt;T&gt; Object getFieldValue(T domain, String fieldName) {
+<span class="fc" id="L20">        return withReadMethod(domain, fieldName, v -&gt; v);</span>
+    }
+
+    public static &lt;T, R&gt; R withReadMethod(T domain, String fieldName, Function&lt;Object, R&gt; function) {
+<span class="fc" id="L24">        Objects.requireNonNull(domain);</span>
+<span class="fc" id="L25">        Objects.requireNonNull(function);</span>
+
+<span class="fc" id="L27">        return Try.of(() -&gt; getReadMethod(domain.getClass(), fieldName))</span>
+<span class="fc" id="L28">                .mapTry(readMethod -&gt; readMethod.invoke(domain))</span>
+<span class="fc" id="L29">                .map(function)</span>
+<span class="fc" id="L30">                .get();</span>
+    }
+
+    // 既有分组又有排序，先分组，对每个分组进行排序
+    public static &lt;T&gt; Seq&lt;T&gt; groupAndSorted(Seq&lt;T&gt; data, List&lt;String&gt; groups, List&lt;OrderEntry&gt; orders) {
+<span class="fc" id="L35">        Comparator&lt;T&gt; comparator = buildComparator(orders);</span>
+<span class="pc bpc" id="L36" title="2 of 6 branches missed.">        if (data.isEmpty() || groups == null || groups.isEmpty()) {</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">            return comparator == null ? data : data.sorted(comparator);</span>
+        }
+
+<span class="fc" id="L40">        String head = groups.head();</span>
+        // 去掉分组字段
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        List&lt;OrderEntry&gt; tailOrder = orders == null ? null : orders.removeFirst(o -&gt; head.equals(o.getField()));</span>
+
+<span class="fc" id="L44">        Map&lt;Object, ? extends Seq&lt;T&gt;&gt; groupMap = data.groupBy(t -&gt; CommonUtils.getFieldValue(t, groups.head()));</span>
+<span class="fc" id="L45">        List&lt;String&gt; tail = groups.tail();</span>
+
+        // 递归继续分组
+<span class="fc" id="L48">        return groupMap.values().map(l -&gt; groupAndSorted(l, tail, tailOrder)).flatMap(l -&gt; l);</span>
+    }
+
+    // 排序
+    public static &lt;T&gt; List&lt;T&gt; sortList(List&lt;T&gt; data, List&lt;OrderEntry&gt; orderEntries) {
+<span class="nc" id="L53">        Comparator&lt;Object&gt; comparator = buildComparator(orderEntries);</span>
+<span class="nc" id="L54">        return data.sorted(comparator);</span>
+    }
+
+    // 获取对象的comparator
+    public static &lt;T&gt; Comparator&lt;T&gt; buildComparator(List&lt;OrderEntry&gt; orders) {
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (orders == null)</span>
+<span class="nc" id="L60">            return null;</span>
+
+<span class="fc" id="L62">        return (o1, o2) -&gt; {</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">            for (OrderEntry orderEntry : orders) {</span>
+<span class="fc" id="L64">                Comparator&lt;T&gt; comparator = getSortedComparator(orderEntry);</span>
+<span class="fc" id="L65">                int compare = comparator.compare(o1, o2);</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">                if (compare != 0)</span>
+<span class="fc" id="L67">                    return compare;</span>
+<span class="fc" id="L68">            }</span>
+<span class="fc" id="L69">            return 0;</span>
+        };
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static int compare(Object o1, Object o2) {
+<span class="pc bpc" id="L75" title="3 of 4 branches missed.">        if (o1 == null &amp;&amp; o2 == null)</span>
+<span class="nc" id="L76">            return 0;</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        else if (o1 == null)</span>
+<span class="nc" id="L78">            return -1;</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        else if (o2 == null)</span>
+<span class="fc" id="L80">            return 1;</span>
+        else {
+<span class="fc" id="L82">            Class&lt;?&gt; o1Class = o1.getClass();</span>
+<span class="fc" id="L83">            Class&lt;?&gt; o2Class = o2.getClass();</span>
+<span class="pc bpc" id="L84" title="3 of 6 branches missed.">            assert o1Class == o2Class &amp;&amp; Comparable.class.isAssignableFrom(o1Class): &quot;类型不匹配&quot;;</span>
+
+<span class="fc" id="L86">            return ((Comparable&lt;Object&gt;) o1).compareTo(o2);</span>
+        }
+    }
+
+    public static boolean eq(Object o1, Object o2) {
+<span class="fc" id="L91">        return Objects.equals(o1, o2);</span>
+    }
+
+    // 排序Comparator
+    private static &lt;T&gt; Comparator&lt;T&gt; getSortedComparator(OrderEntry orderEntry) {
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (orderEntry == null)</span>
+<span class="nc" id="L97">            return null;</span>
+
+<span class="fc" id="L99">        return (o1, o2) -&gt; {</span>
+<span class="fc" id="L100">            String field = orderEntry.getField();</span>
+<span class="fc" id="L101">            Order order = orderEntry.getOrder();</span>
+<span class="fc" id="L102">            Object v1 = getFieldValue(o1, field);</span>
+<span class="fc" id="L103">            Object v2 = getFieldValue(o2, field);</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">            return order == Order.DESC ? compare(v2, v1) : compare(v1, v2);</span>
+        };
+    }
+
+    private static Method getReadMethod(Class&lt;?&gt; domainClass, String fieldName) throws Exception {
+<span class="fc" id="L109">        checkDomainType(domainClass);</span>
+<span class="fc" id="L110">        PropertyDescriptor[] pds = Introspector.getBeanInfo(domainClass)</span>
+<span class="fc" id="L111">                .getPropertyDescriptors();</span>
+<span class="pc bpc" id="L112" title="2 of 4 branches missed.">        if (pds == null || pds.length == 0)</span>
+<span class="nc" id="L113">            throw new RuntimeException(&quot;clazz没有属性或没有相应get/set方法&quot;);</span>
+
+<span class="fc" id="L115">        return List.of(pds)</span>
+<span class="pc bpc" id="L116" title="1 of 4 branches missed.">                .find(pd -&gt; pd != null &amp;&amp; pd.getName().equals(fieldName))</span>
+<span class="fc" id="L117">                .map(PropertyDescriptor::getReadMethod)</span>
+<span class="pc" id="L118">                .getOrElseThrow(() -&gt; new NoSuchFieldException(&quot;未知属性&quot; + fieldName));</span>
+    }
+
+    private static void checkDomainType(Class&lt;?&gt; clazz) {
+<span class="pc bpc" id="L122" title="3 of 6 branches missed.">        if (clazz.isArray() || clazz.isPrimitive() || clazz.isEnum() ||</span>
+<span class="pc bpc" id="L123" title="2 of 4 branches missed.">                (clazz.getPackage() != null &amp;&amp; clazz.getPackage().getName().startsWith(&quot;java.lang&quot;)))</span>
+<span class="nc" id="L124">            throw new IllegalArgumentException(&quot;clazz: &quot; + clazz + &quot; 类型不合法&quot;);</span>
+<span class="fc" id="L125">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

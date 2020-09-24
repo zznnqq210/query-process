@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderEntry.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">query-service</a> &gt; <a href="index.source.html" class="el_package">com.query.utils</a> &gt; <span class="el_source">OrderEntry.java</span></div><h1>OrderEntry.java</h1><pre class="source lang-java linenums">package com.query.utils;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+<span class="pc bpc" id="L6" title="1 of 2 branches missed.">public class OrderEntry implements Serializable {</span>
+
+    private static final long serialVersionUID = -5143003207202364342L;
+
+    private final String field; // 排序属性名
+
+    private final Order order; // 排序方式
+
+    public OrderEntry(String field) {
+<span class="fc" id="L15">        this(field, Order.ASC);</span>
+<span class="fc" id="L16">    }</span>
+
+<span class="fc" id="L18">    public OrderEntry(String field, Order order) {</span>
+<span class="pc bpc" id="L19" title="4 of 8 branches missed.">        assert field != null &amp;&amp; !field.isEmpty() &amp;&amp; order != null: &quot;参数不能为空&quot;;</span>
+<span class="fc" id="L20">        this.field = field;</span>
+<span class="fc" id="L21">        this.order = order;</span>
+<span class="fc" id="L22">    }</span>
+
+    public String getField() {
+<span class="fc" id="L25">        return field;</span>
+    }
+
+    public Order getOrder() {
+<span class="fc" id="L29">        return order;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L34">        return &quot;OrderEntry{&quot; +</span>
+                &quot;field='&quot; + field + '\'' +
+                &quot;, order=&quot; + order +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (this == o) return true;</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (!(o instanceof OrderEntry)) return false;</span>
+<span class="nc" id="L44">        OrderEntry that = (OrderEntry) o;</span>
+<span class="nc" id="L45">        return Objects.equals(field, that.field);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L50">        return Objects.hashCode(field);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

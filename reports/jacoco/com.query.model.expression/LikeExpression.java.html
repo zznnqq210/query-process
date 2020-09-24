@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LikeExpression.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">query-service</a> &gt; <a href="index.source.html" class="el_package">com.query.model.expression</a> &gt; <span class="el_source">LikeExpression.java</span></div><h1>LikeExpression.java</h1><pre class="source lang-java linenums">package com.query.model.expression;
+
+import static com.query.utils.CommonUtils.eq;
+import static com.query.utils.CommonUtils.withReadMethod;
+
+<span class="pc bpc" id="L6" title="1 of 2 branches missed.">public class LikeExpression&lt;T&gt; implements Expression&lt;T&gt; {</span>
+
+    private static final String FLAG_CHAR = &quot;%&quot;;
+
+    private final String fieldName;
+
+    private final String value;
+
+<span class="fc" id="L14">    LikeExpression(String fieldName, String value) {</span>
+<span class="fc" id="L15">        this.fieldName = fieldName;</span>
+<span class="fc" id="L16">        this.value = value;</span>
+<span class="fc" id="L17">    }</span>
+
+    @Override
+    public boolean test(T o) {
+<span class="fc" id="L21">        return withReadMethod(o, fieldName, v -&gt; {</span>
+<span class="pc bpc" id="L22" title="2 of 4 branches missed.">            assert v instanceof String: &quot;like仅支持String类型&quot;;</span>
+<span class="fc" id="L23">            String fieldValue = (String) v;</span>
+<span class="fc" id="L24">            return like(fieldValue, value);</span>
+        });
+    }
+
+    private static boolean like(String fieldValue, String value) {
+<span class="fc" id="L29">        String s = value;</span>
+        // 空值返回false
+<span class="pc bpc" id="L31" title="2 of 4 branches missed.">        if (s == null || s.isEmpty())</span>
+<span class="nc" id="L32">            return false;</span>
+
+        // '%' '%%'返回true, 其他字符串去掉收尾%后比较
+<span class="pc bpc" id="L35" title="1 of 4 branches missed.">        if (s.startsWith(FLAG_CHAR) &amp;&amp; s.endsWith(FLAG_CHAR)) {</span>
+<span class="fc" id="L36">            s = s.substring(1, s.length() - 1);</span>
+<span class="fc" id="L37">            return fieldValue.contains(s);</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        } else if (s.startsWith(FLAG_CHAR)) {</span>
+<span class="fc" id="L39">            s = s.substring(1);</span>
+<span class="fc" id="L40">            return fieldValue.endsWith(s);</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        } else if (s.endsWith(FLAG_CHAR)) {</span>
+<span class="nc" id="L42">            s = s.substring(0, s.length() - 1);</span>
+<span class="nc" id="L43">            return fieldValue.startsWith(s);</span>
+        } else {
+            // 默认情况，判断相等
+<span class="nc" id="L46">            return eq(fieldValue, s);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

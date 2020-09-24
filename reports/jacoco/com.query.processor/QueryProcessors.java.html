@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QueryProcessors.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">query-service</a> &gt; <a href="index.source.html" class="el_package">com.query.processor</a> &gt; <span class="el_source">QueryProcessors.java</span></div><h1>QueryProcessors.java</h1><pre class="source lang-java linenums">package com.query.processor;
+
+import com.query.model.GroupBy;
+import com.query.model.Limit;
+import com.query.model.OrderBy;
+import com.query.model.Where;
+import com.query.utils.CommonUtils;
+import com.query.utils.OrderEntry;
+import io.vavr.collection.List;
+import io.vavr.collection.Seq;
+
+// 查询处理
+public abstract class QueryProcessors {
+
+    private QueryProcessors() {}
+
+    public static &lt;T&gt; java.util.List&lt;T&gt; query(java.util.List&lt;T&gt; data, Limit limit) {
+<span class="fc" id="L18">        return query(data, null, null, null, limit);</span>
+    }
+
+    public static &lt;T&gt; java.util.List&lt;T&gt; query(java.util.List&lt;T&gt; data, OrderBy orderBy) {
+<span class="fc" id="L22">        return query(data, null, null, orderBy);</span>
+    }
+
+    public static &lt;T&gt; java.util.List&lt;T&gt; query(java.util.List&lt;T&gt; data, GroupBy groupBy) {
+<span class="fc" id="L26">        return query(data, null, groupBy);</span>
+    }
+
+    public static &lt;T&gt; java.util.List&lt;T&gt; query(java.util.List&lt;T&gt; data, Where&lt;T&gt; where) {
+<span class="fc" id="L30">        return query(data, where, null);</span>
+    }
+
+    public static &lt;T&gt; java.util.List&lt;T&gt; query(java.util.List&lt;T&gt; data, Where&lt;T&gt; where, GroupBy groupBy) {
+<span class="fc" id="L34">        return query(data, where, groupBy, null);</span>
+    }
+
+    public static &lt;T&gt; java.util.List&lt;T&gt; query(java.util.List&lt;T&gt; data, Where&lt;T&gt; where, GroupBy groupBy, OrderBy orderBy) {
+<span class="fc" id="L38">        return query(data, where, groupBy, orderBy,null);</span>
+    }
+
+    public static &lt;T&gt; java.util.List&lt;T&gt; query(java.util.List&lt;T&gt; data, Where&lt;T&gt; where, GroupBy groupBy,
+                                    OrderBy orderBy, Limit limit) {
+<span class="pc bpc" id="L43" title="2 of 4 branches missed.">        if (data == null || data.isEmpty())</span>
+<span class="nc" id="L44">            return data;</span>
+
+<span class="fc" id="L46">        Seq&lt;T&gt; result = List.ofAll(data);</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (where != null)</span>
+<span class="fc" id="L48">            result = result.filter(where::toPredicate);</span>
+
+        // 处理groupBy和orderBy
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        List&lt;String&gt; groupList = groupBy == null ? List.empty() : List.ofAll(groupBy.getFields());</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        List&lt;OrderEntry&gt; orders = orderBy == null ? List.empty() : List.ofAll(orderBy.getOrders());</span>
+<span class="fc" id="L53">        result = CommonUtils.groupAndSorted(result, groupList, orders);</span>
+
+<span class="fc" id="L55">        return limitResult(result, limit).toJavaList();</span>
+    }
+
+    private static &lt;T&gt; Seq&lt;T&gt; limitResult(Seq&lt;T&gt; result, Limit limit) {
+<span class="pc bpc" id="L59" title="2 of 6 branches missed.">        if (result != null &amp;&amp; !result.isEmpty() &amp;&amp; limit != null) {</span>
+<span class="fc" id="L60">            int from = limit.getStart();</span>
+<span class="fc" id="L61">            int end = limit.getEnd();</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">            if (from &gt; result.size())</span>
+<span class="nc" id="L63">                from = result.size();</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">            if (end &gt; result.size())</span>
+<span class="nc" id="L65">                end = result.size();</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">            if (end &lt; from)</span>
+<span class="nc" id="L67">                end = from;</span>
+<span class="fc" id="L68">            return result.subSequence(from, end);</span>
+        }
+
+<span class="fc" id="L71">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

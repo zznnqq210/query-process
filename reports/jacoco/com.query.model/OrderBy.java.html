@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderBy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">query-service</a> &gt; <a href="index.source.html" class="el_package">com.query.model</a> &gt; <span class="el_source">OrderBy.java</span></div><h1>OrderBy.java</h1><pre class="source lang-java linenums">package com.query.model;
+
+import com.query.utils.Order;
+import com.query.utils.OrderEntry;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+public class OrderBy implements Serializable {
+
+    private static final long serialVersionUID = 590066252820361260L;
+
+    private final List&lt;OrderEntry&gt; orders;
+
+    public OrderBy() {
+<span class="fc" id="L20">        this(new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L21">    }</span>
+
+<span class="fc" id="L23">    public OrderBy(List&lt;OrderEntry&gt; orders) {</span>
+<span class="fc" id="L24">        this.orders = new ArrayList&lt;&gt;(orders);</span>
+<span class="fc" id="L25">    }</span>
+
+    public void addOrder(String field) {
+<span class="fc" id="L28">        addOrder(new OrderEntry(field));</span>
+<span class="fc" id="L29">    }</span>
+
+    public void addOrder(String field, Order order) {
+<span class="fc" id="L32">        addOrder(new OrderEntry(field, order));</span>
+<span class="fc" id="L33">    }</span>
+
+    public void addOrder(OrderEntry orderEntry) {
+<span class="fc" id="L36">        addOrders(orderEntry);</span>
+<span class="fc" id="L37">    }</span>
+
+    public void addOrders(OrderEntry... orders) {
+<span class="fc" id="L40">        addOrders(Arrays.asList(orders));</span>
+<span class="fc" id="L41">    }</span>
+
+    public void addOrders(List&lt;OrderEntry&gt; orders) {
+<span class="fc" id="L44">        this.orders.addAll(orders);</span>
+<span class="fc" id="L45">    }</span>
+
+    public List&lt;OrderEntry&gt; getOrders() {
+<span class="fc" id="L48">        return this.orders.stream()</span>
+<span class="fc" id="L49">                .filter(Objects::nonNull)</span>
+<span class="fc" id="L50">                .distinct()</span>
+<span class="fc" id="L51">                .collect(Collectors.toList());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
